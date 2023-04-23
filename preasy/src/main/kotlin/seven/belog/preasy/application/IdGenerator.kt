@@ -1,11 +1,11 @@
 package seven.belog.preasy.application
 
-import seven.belog.preasy.domain.FileId
+import seven.belog.preasy.domain.SaveId
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 
 fun interface IdGenerator {
-    fun generateId(): FileId
+    fun generateId(): SaveId
 }
 
 fun numericIdGenerator(length: Int) = IdGenerator {
@@ -13,5 +13,5 @@ fun numericIdGenerator(length: Int) = IdGenerator {
     (1..length).forEach { _ ->
         idValue.append((Random.nextInt().absoluteValue % 10).toString())
     }
-    FileId(id = idValue.toString())
+    SaveId(id = idValue.toString())
 }

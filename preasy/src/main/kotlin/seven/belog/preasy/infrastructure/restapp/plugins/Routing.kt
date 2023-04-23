@@ -1,4 +1,4 @@
-package seven.belog.preasy.infrastructure.plugins
+package seven.belog.preasy.infrastructure.restapp.plugins
 
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -7,19 +7,19 @@ import io.ktor.server.response.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import seven.belog.preasy.application.Service
-import seven.belog.preasy.domain.FileId
+import seven.belog.preasy.domain.SaveId
 import seven.belog.preasy.domain.Password
-import seven.belog.preasy.infrastructure.requests.GetFileRequest
+import seven.belog.preasy.infrastructure.restapp.requests.GetFileRequest
 
 private const val PASSWORD_PART_NAME = "password"
 private const val FILE_PART_NAME = "file"
 
-fun Application.configureRouting() {
+internal fun Application.configureRouting(service: Service) {
     routing {
         checkHealth()
-        saveFile()
-        getFile()
-        deleteFile()
+        saveFile(service)
+        getFile(service)
+        deleteFile(service)
     }
 }
 
@@ -27,7 +27,7 @@ private fun Route.checkHealth() = get("/check") {
     call.respondText("Hello World!")
 }
 
-private fun Route.saveFile() = post("/save") {
+private fun Route.saveFile(service: Service) = post("/save") {
     var password: Password? = null
     var file: ByteArray? = null
 
@@ -46,7 +46,7 @@ private fun Route.saveFile() = post("/save") {
         part.dispose()
     }
 
-    val validatedFile = Service.validateFile(file).getOrElse {
+    val validatedFile = service.validateFile(file).getOrElse {
         call.respondText(
             text = it.message ?: "",
             status = HttpStatusCode.BadRequest
@@ -55,7 +55,7 @@ private fun Route.saveFile() = post("/save") {
     }
 
 
-    val fileId = Service.save(
+    val fileId = service.save(
         file = validatedFile,
         password = password
     )
@@ -63,10 +63,10 @@ private fun Route.saveFile() = post("/save") {
     call.respondText(text = fileId.id, status = HttpStatusCode.OK)
 }
 
-private fun Route.getFile() = post("/get") {
+private fun Route.getFile(service: Service) = post("/get") {
     val request = call.receive<GetFileRequest>()
-    val result = Service.get(
-        id = FileId(id = request.id),
+    val result = service.get(
+        id = SaveId(id = request.id),
         password = Password.of(request.password)
     )
     result.onFailure {
@@ -78,7 +78,7 @@ private fun Route.getFile() = post("/get") {
     }
 }
 
-private fun Route.deleteFile() = delete("/delete/{id}") {
+private fun Route.deleteFile(service: Service) = delete("/delete/{id}") {
     val id = call.parameters["id"]
 
     if (id == null) {
@@ -86,5 +86,5 @@ private fun Route.deleteFile() = delete("/delete/{id}") {
         return@delete
     }
 
-    Service.deleteIfPresent(FileId(id))
+    service.delete(SaveId(id))
 }

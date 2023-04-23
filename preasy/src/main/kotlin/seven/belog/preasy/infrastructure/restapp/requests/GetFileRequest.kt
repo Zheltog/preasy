@@ -1,9 +1,9 @@
-package seven.belog.preasy.infrastructure.requests
+package seven.belog.preasy.infrastructure.restapp.requests
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GetFileRequest(
+internal data class GetFileRequest(
     val id: String,
     val password: String?
 )
