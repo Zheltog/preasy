@@ -22,15 +22,16 @@ repositories {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-netty-jvm:$ktor_version")
-    implementation("io.ktor:ktor-server-content-negotiation:$ktor_version")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor_version")
-    implementation("org.ktorm:ktorm-core:3.6.0")
-    implementation("org.ktorm:ktorm-support-postgresql:3.6.0")
+    implementation(libs.ktorServerCoreJvm)
+    implementation(libs.ktorServerNettyJvm)
+    implementation(libs.ktorServerContentNegotiation)
+    implementation(libs.ktorSerializationKotlinxJson)
+    implementation(libs.ktormCore)
+    implementation(libs.ktormSupportPostgresql)
     implementation("org.postgresql:postgresql:42.6.0")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
-    testImplementation("io.ktor:ktor-server-tests-jvm:$ktor_version")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+//    implementation(libs.postgresql)
+    implementation(libs.logbackClassic)
+    testImplementation(libs.ktorServerTestsJvm)
+    testImplementation(libs.kotlinTestJunit)
+    testImplementation(libs.mockitoKotlin)
 }
