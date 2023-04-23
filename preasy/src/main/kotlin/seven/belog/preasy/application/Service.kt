@@ -1,13 +1,12 @@
 package seven.belog.preasy.application
 
 import seven.belog.preasy.domain.Password
-import seven.belog.preasy.domain.File
 import seven.belog.preasy.domain.FileId
 
 object Service {
 
     private data class FileAndPassword(
-        val file: File,
+        val file: ByteArray,
         val password: Password?
     )
 
@@ -15,7 +14,7 @@ object Service {
 
     private val idGenerator = numericIdGenerator(4)
 
-    fun save(file: File, password: Password?): FileId {
+    fun save(file: ByteArray, password: Password?): FileId {
         val id = idGenerator.generateId()
         saves[id] = FileAndPassword(
             file = file,
@@ -24,7 +23,7 @@ object Service {
         return id
     }
 
-    fun get(id: FileId, password: Password?): Result<File> {
+    fun get(id: FileId, password: Password?): Result<ByteArray> {
         val found = saves[id]
             ?: return Result.failure(Exception("File not found"))
 
@@ -33,5 +32,14 @@ object Service {
         }
 
         return Result.success(found.file)
+    }
+
+    fun deleteIfPresent(id: FileId) {
+        saves.remove(id)
+    }
+
+    fun validateFile(file: ByteArray?): Result<ByteArray> {
+        file ?: return Result.failure(Exception("No file provided"))
+        return Result.success(file)
     }
 }
