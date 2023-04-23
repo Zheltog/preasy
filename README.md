@@ -15,13 +15,15 @@ Path: save\
 Requires: form-data with\
 a) password: string or null\
 b) file: file attachment\
-Returns: ID of new save
+Returns: JSON with\
+a) id: string - uploaded file ID\
+b) expiresAt: string (timestamp) - file expire date
 
 3 **Get file**\
 Method: POST\
 Path: get\
 Requires: JSON with\
-a) ID: string\
+a) id: string\
 b) password: string (if was defined) or null (if wasn't)\
 Returns: file content
 
