@@ -1,5 +1,6 @@
 package seven.belog.preasy.application
 
+import org.slf4j.LoggerFactory
 import seven.belog.preasy.domain.Password
 import seven.belog.preasy.domain.Save
 import seven.belog.preasy.domain.SaveId
@@ -10,9 +11,13 @@ class ServiceImpl(
     private val queryService: SaveQueryService
 ): Service {
 
+    private val logger = LoggerFactory.getLogger(ServiceImpl::class.java)
+
     private val idGenerator = numericIdGenerator(4)
 
     override fun save(file: ByteArray, password: Password?): Save {
+        logger.info("saving new file...")
+
         val id = idGenerator.generateId()
 
         val save = Save(
@@ -24,10 +29,14 @@ class ServiceImpl(
 
         queryService.createSave(save)
 
+        logger.info("saved file, id = {}", save.id)
+
         return save
     }
 
     override fun get(id: SaveId, password: Password?): Result<ByteArray> {
+        logger.info("getting file, id = {}", id)
+
         val found = queryService.findSaveById(id)
             ?: return Result.failure(Exception("Save not found"))
 
@@ -39,6 +48,7 @@ class ServiceImpl(
     }
 
     override fun delete(id: SaveId) {
+        logger.info("deleting file, id = {}", id)
         queryService.deleteSaveById(id)
     }
 

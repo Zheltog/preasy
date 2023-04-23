@@ -1,4 +1,4 @@
-package seven.belog.preasy.infrastructure.db
+package seven.belog.preasy.infrastructure
 
 import org.slf4j.LoggerFactory
 import seven.belog.preasy.application.SaveQueryService
