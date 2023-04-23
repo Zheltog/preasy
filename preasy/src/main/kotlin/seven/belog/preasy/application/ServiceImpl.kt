@@ -3,23 +3,28 @@ package seven.belog.preasy.application
 import seven.belog.preasy.domain.Password
 import seven.belog.preasy.domain.Save
 import seven.belog.preasy.domain.SaveId
+import java.time.LocalDateTime
 
 class ServiceImpl(
+    private val saveTtlSeconds: Long,
     private val queryService: SaveQueryService
 ): Service {
 
     private val idGenerator = numericIdGenerator(4)
 
-    override fun save(file: ByteArray, password: Password?): SaveId {
+    override fun save(file: ByteArray, password: Password?): Save {
         val id = idGenerator.generateId()
 
-        queryService.createSave(Save(
+        val save = Save(
             id = id,
             password = password,
-            file = file
-        ))
+            file = file,
+            expires = LocalDateTime.now().plusSeconds(saveTtlSeconds)
+        )
 
-        return id
+        queryService.createSave(save)
+
+        return save
     }
 
     override fun get(id: SaveId, password: Password?): Result<ByteArray> {
@@ -34,7 +39,7 @@ class ServiceImpl(
     }
 
     override fun delete(id: SaveId) {
-        queryService.deleteSave(id)
+        queryService.deleteSaveById(id)
     }
 
     override fun validateFile(file: ByteArray?): Result<ByteArray> {

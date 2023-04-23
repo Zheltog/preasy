@@ -10,6 +10,8 @@ import seven.belog.preasy.application.Service
 import seven.belog.preasy.domain.SaveId
 import seven.belog.preasy.domain.Password
 import seven.belog.preasy.infrastructure.restapp.requests.GetFileRequest
+import seven.belog.preasy.infrastructure.restapp.responses.SaveFileResponse
+import java.time.format.DateTimeFormatter
 
 private const val PASSWORD_PART_NAME = "password"
 private const val FILE_PART_NAME = "file"
@@ -55,18 +57,21 @@ private fun Route.saveFile(service: Service) = post("/save") {
     }
 
 
-    val fileId = service.save(
+    val save = service.save(
         file = validatedFile,
         password = password
     )
 
-    call.respondText(text = fileId.id, status = HttpStatusCode.OK)
+    call.respond(status = HttpStatusCode.OK, message = SaveFileResponse(
+        id = save.id.value,
+        expiresAt = save.expires.format(DateTimeFormatter.ISO_DATE_TIME)
+    ))
 }
 
 private fun Route.getFile(service: Service) = post("/get") {
     val request = call.receive<GetFileRequest>()
     val result = service.get(
-        id = SaveId(id = request.id),
+        id = SaveId(value = request.id),
         password = Password.of(request.password)
     )
     result.onFailure {

@@ -6,6 +6,8 @@ import seven.belog.preasy.application.SaveQueryService
 import seven.belog.preasy.domain.Password
 import seven.belog.preasy.domain.Save
 import seven.belog.preasy.domain.SaveId
+import java.sql.Timestamp
+import java.time.LocalDateTime
 
 internal class SaveQueryServiceImpl(
     private val database: Database
@@ -14,13 +16,14 @@ internal class SaveQueryServiceImpl(
     override fun findSaveById(id: SaveId): Save? {
         val unvalidated = database
             .from(SaveEntity)
-            .select(SaveEntity.id, SaveEntity.password, SaveEntity.file)
-            .where { SaveEntity.id eq id.id }
+            .select(SaveEntity.id, SaveEntity.password, SaveEntity.file, SaveEntity.expires)
+            .where { SaveEntity.id eq id.value }
             .map { row ->
                 UnvalidatedSave(
                     id = row[SaveEntity.id],
                     password = row[SaveEntity.password],
-                    file = row[SaveEntity.file]
+                    file = row[SaveEntity.file],
+                    expires = row[SaveEntity.expires]
                 )
             }.firstOrNull()
 
@@ -29,22 +32,30 @@ internal class SaveQueryServiceImpl(
 
     override fun createSave(save: Save) {
         database.insert(SaveEntity) {
-            set(it.id, save.id.id)
-            set(it.password, save.password?.password)
+            set(it.id, save.id.value)
+            set(it.password, save.password?.value)
             set(it.file, save.file)
+            set(it.expires, Timestamp.valueOf(save.expires))
         }
     }
 
-    override fun deleteSave(id: SaveId) {
+    override fun deleteSaveById(id: SaveId) {
         database.delete(SaveEntity) {
-            it.id eq id.id
+            it.id eq id.value
+        }
+    }
+
+    override fun deleteExpiredSaves(now: LocalDateTime) {
+        database.delete(SaveEntity) {
+            it.expires less Timestamp.valueOf(now)
         }
     }
 
     private data class UnvalidatedSave(
         val id: String?,
         val password: String?,
-        val file: ByteArray?
+        val file: ByteArray?,
+        val expires: Timestamp?
     )
 
     private fun saveOf(unvalidated: UnvalidatedSave?): Save? {
@@ -58,10 +69,14 @@ internal class SaveQueryServiceImpl(
         val file = unvalidated.file
             ?: throw Exception("file is not defined")
 
+        val expires = unvalidated.expires
+            ?: throw Exception("expires is not defined")
+
         return Save(
             id = id,
             password = password,
-            file = file
+            file = file,
+            expires = expires.toLocalDateTime()
         )
     }
 }

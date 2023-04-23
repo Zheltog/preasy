@@ -9,11 +9,11 @@ import seven.belog.preasy.infrastructure.restapp.plugins.configureSerialization
 
 internal class Server(private val service: Service) {
 
-    fun start() {
+    fun start(port: Int, host: String) {
         embeddedServer(
             factory = Netty,
-            port = 8080,
-            host = "0.0.0.0",
+            port = port,
+            host = host,
             module = { module(service) }
         ).start(wait = true)
     }

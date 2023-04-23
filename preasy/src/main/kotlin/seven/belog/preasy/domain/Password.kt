@@ -2,7 +2,7 @@ package seven.belog.preasy.domain
 
 @JvmInline
 value class Password(
-    val password: String
+    val value: String
 ) {
 
     companion object {

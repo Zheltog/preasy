@@ -13,5 +13,5 @@ fun numericIdGenerator(length: Int) = IdGenerator {
     (1..length).forEach { _ ->
         idValue.append((Random.nextInt().absoluteValue % 10).toString())
     }
-    SaveId(id = idValue.toString())
+    SaveId(value = idValue.toString())
 }

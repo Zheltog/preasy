@@ -4,6 +4,7 @@ import org.ktorm.database.Database
 import org.ktorm.support.postgresql.PostgreSqlDialect
 import seven.belog.preasy.application.ServiceImpl
 import seven.belog.preasy.infrastructure.db.SaveQueryServiceImpl
+import seven.belog.preasy.infrastructure.db.OldSavesCleaner
 import seven.belog.preasy.infrastructure.restapp.Server
 
 fun main() {
@@ -15,7 +16,17 @@ fun main() {
         password = "postgres"
     )
 
-    Server(service = ServiceImpl(
+    val queryService = SaveQueryServiceImpl(database)
+
+    OldSavesCleaner(
         queryService = SaveQueryServiceImpl(database)
-    )).start()
+    ).launch(intervalSeconds = 30)
+
+    Server(service = ServiceImpl(
+        saveTtlSeconds = 60L,
+        queryService = queryService
+    )).start(
+        port = 8080,
+        host = "0.0.0.0"
+    )
 }
